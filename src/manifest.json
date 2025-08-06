@@ -1,11 +1,31 @@
 {
-    "requires": {
-        "cockpit": "137"
-    },
-
-    "tools": {
-        "index": {
-            "label": "Starter Kit"
-        }
-    }
+  "priority": 0,
+  "requires": {
+       "cockpit": "215"
+  },
+ 
+  "menu": {
+     "borg": {
+        "label": "Borgmatic",
+        "path": "index.html",
+        "order": 60,
+        "docs": [
+            {
+                "label": "Managing Borg Backups",
+                "url": ""
+            }
+        ],
+        "keywords": [
+            {
+                "matches": ["borg", "backup"]
+            }
+        ]
+     }
+  },
+  "content-security-policy": "frame-src 'self' data:",
+  "config": {
+      "StorageMigrationSupported": {
+          "rhel": false
+      }
+  }
 }

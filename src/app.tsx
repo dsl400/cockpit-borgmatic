@@ -18,31 +18,117 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Alert } from "@patternfly/react-core/dist/esm/components/Alert/index.js";
-import { Card, CardBody, CardTitle } from "@patternfly/react-core/dist/esm/components/Card/index.js";
 
+import { ListingTable } from "cockpit-components-table.jsx";
+
+import { Button, Card, CardBody, CardTitle, Flex, FormSelect, FormSelectOption } from '@patternfly/react-core';
+import {
+    Table,
+    Tbody,
+    Thead, Th, Td, Tr,
+    TableVariant,
+} from '@patternfly/react-table';
 import cockpit from 'cockpit';
+import { PlusIcon } from '@patternfly/react-icons';
+import AddRepo from './components/add-repo';
+import RepoActions from './components/repo-actions';
 
 const _ = cockpit.gettext;
 
 export const Application = () => {
-    const [hostname, setHostname] = useState(_("Unknown"));
+    const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
+
+    // const [hostname, setHostname] = useState(_("Unknown"));
+
+    const options = [
+        { value: '', label: 'Repository', disabled: false, isPlaceholder: true },
+        { value: '1', label: 'One', disabled: false, isPlaceholder: false },
+        { value: '2', label: 'Two', disabled: false, isPlaceholder: false },
+        { value: '3', label: 'Three - the only valid option', disabled: false, isPlaceholder: false }
+    ];
 
     useEffect(() => {
         const hostname = cockpit.file('/etc/hostname');
-        hostname.watch(content => setHostname(content?.trim() ?? ""));
+        // hostname.watch(content => setHostname(content?.trim() ?? ""));
         return hostname.close;
     }, []);
 
     return (
-        <Card>
-            <CardTitle>Starter Kit</CardTitle>
-            <CardBody>
-                <Alert
-                    variant="info"
-                    title={ cockpit.format(_("Running on $0"), hostname) }
+        <>
+            <Flex>
+                <Flex grow={{ default: 'grow' }}>
+                    <FormSelect>
+                        {options.map((option, index) => (
+                            <FormSelectOption
+                            isDisabled={option.disabled}
+                            key={index}
+                            value={option.value}
+                            label={option.label}
+                            isPlaceholder={option.isPlaceholder}
+                            />
+                        ))}
+                    </FormSelect>
+                </Flex>
+                <Flex>
+                    <Button variant="stateful" state="read" icon={<PlusIcon />} onClick={() => setAddRepoModalState(true)}>
+                        {_("Add Repository")}
+                    </Button>
+                    <AddRepo toggleModal={setAddRepoModalState} isOpen={modalAddRepoOpened} existingLocations={["22"]} />
+                </Flex>
+            </Flex>
+            <Flex grow={{ default: 'grow' }}>
+                {/* <Card isFullHeight style={{ width: '100%' }}>
+                    <CardTitle>Backup Locations</CardTitle>
+                    <CardBody>
+                        <Table variant={TableVariant.compact} aria-label="Backup Locations Table">
+                            <Thead>
+                                <Tr>
+                                    <Th>{_("Name")}</Th>
+                                    <Th>{_("Status")}</Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                <Tr>
+                                    <Td>{_("Location 1")}</Td>
+                                    <Td>{_("Active")}</Td>
+                                </Tr>
+                            </Tbody>
+                        </Table>
+                    </CardBody>
+                </Card> */}
+                <ListingTable
+                    aria-label={_("Virtual machines")}
+                    variant='compact'
+                    columns={[
+                        { title: _("Name"), header: true, props: { width: 25 } },
+                        { title: _("Connection"), props: { width: 25 } },
+                        { title: _("State"), props: { width: 25 } },
+                        { title: "", props: { width: 25, "aria-label": _("Actions") } },
+                    ]}
+                    emptyCaption={_("No Backup Locations defined.")}
+                    rows={[
+                        {
+                            columns: [
+                                {
+                                    title: (
+                                        <Button
+                                            variant="link"
+                                            isInline
+                                            component="a"
+                                            href={"#" + _("Location 1")}
+                                        >
+                                            {_("Location 1")}
+                                        </Button>
+                                    )
+                                },
+                                { title: _("Active") },
+                                { title: _("Running") },
+                                { title: <RepoActions /> }
+                            ]
+                        }
+                    ]}
                 />
-            </CardBody>
-        </Card>
+            </Flex>
+        </>
     );
 };
