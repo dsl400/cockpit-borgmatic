@@ -17,7 +17,7 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { ListingTable } from "cockpit-components-table.jsx";
 
@@ -32,13 +32,15 @@ import cockpit from 'cockpit';
 import { PlusIcon } from '@patternfly/react-icons';
 import AddRepo from './components/add-repo';
 import RepoActions from './components/repo-actions';
+import { BorgmaticFilesContext } from './context/borgmatic-config-files';
 
 const _ = cockpit.gettext;
 
 export const Application = () => {
     const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
 
-    // const [hostname, setHostname] = useState(_("Unknown"));
+    const files = useContext(BorgmaticFilesContext);
+    console.log("Borgmatic files context:", files);
 
     const options = [
         { value: '', label: 'Repository', disabled: false, isPlaceholder: true },
