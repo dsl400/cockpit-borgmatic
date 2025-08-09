@@ -1,15 +1,16 @@
 import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
-import React, { Dispatch, SetStateAction, useState } from "react";
-// import { Modal } from "@patternfly/react-core";
+import React, { Dispatch, SetStateAction, useContext, useState } from "react";
+import cockpit from 'cockpit';
+import { BorgmaticLocationsContext } from "../context/borgmatic-config-files";
 
 interface AddRepoProps {
     toggleModal: Dispatch<SetStateAction<boolean>>;
     isOpen: boolean;
-    existingLocations: string[];
 }
 
-function AddRepo({ toggleModal, isOpen, existingLocations }: AddRepoProps) {
+function AddRepo({ toggleModal, isOpen }: AddRepoProps) {
+    const { existingLocations, reloadLocations } = useContext(BorgmaticLocationsContext);
     const [locationName, setName] = useState("");
     const [locationExists, setLocationExists] = useState(false);
 
@@ -23,8 +24,18 @@ function AddRepo({ toggleModal, isOpen, existingLocations }: AddRepoProps) {
         } else {
             setLocationExists(false);
         }
-
         setName(name);
+    };
+
+    const handleConfirm = () => {
+        cockpit.spawn(['touch', `/etc/borgmatic.d/${locationName}.yml`], { superuser: 'require', err: 'message' })
+                .then(() => {
+                    toggleModal(false);
+                    reloadLocations();
+                })
+                .catch((err) => {
+                    console.error("Failed to create location:", err);
+                });
     };
 
     return (
@@ -58,7 +69,7 @@ function AddRepo({ toggleModal, isOpen, existingLocations }: AddRepoProps) {
                 <Button
                     key="confirm"
                     variant="primary"
-                    onClick={() => toggleModal(false)}
+                    onClick={handleConfirm}
                     isDisabled={!locationName.length || locationExists}
                 >
                     Confirm

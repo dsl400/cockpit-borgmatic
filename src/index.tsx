@@ -23,10 +23,15 @@ import { createRoot } from 'react-dom/client';
 import "cockpit-dark-theme";
 
 import { Application } from './app.jsx';
+import { BorgmaticConfigFilesProvider } from './context/borgmatic-config-files';
 
 import "patternfly/patternfly-6-cockpit.scss";
 import './app.scss';
 
 document.addEventListener("DOMContentLoaded", () => {
-    createRoot(document.getElementById("app")!).render(<Application />);
+    createRoot(document.getElementById("app")!).render(
+        <BorgmaticConfigFilesProvider>
+            <Application />
+        </BorgmaticConfigFilesProvider>
+    );
 });

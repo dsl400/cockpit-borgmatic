@@ -17,89 +17,40 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { ListingTable } from "cockpit-components-table.jsx";
 
-import { Button, Card, CardBody, CardTitle, Flex, FormSelect, FormSelectOption } from '@patternfly/react-core';
-import {
-    Table,
-    Tbody,
-    Thead, Th, Td, Tr,
-    TableVariant,
-} from '@patternfly/react-table';
-import cockpit from 'cockpit';
+import { Button, Flex } from '@patternfly/react-core';
+
 import { PlusIcon } from '@patternfly/react-icons';
+import cockpit from 'cockpit';
 import AddRepo from './components/add-repo';
 import RepoActions from './components/repo-actions';
-import { BorgmaticFilesContext } from './context/borgmatic-config-files';
+import { BorgmaticLocationsContext } from './context/borgmatic-config-files';
 
 const _ = cockpit.gettext;
 
 export const Application = () => {
+
     const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
 
-    const files = useContext(BorgmaticFilesContext);
-    console.log("Borgmatic files context:", files);
-
-    const options = [
-        { value: '', label: 'Repository', disabled: false, isPlaceholder: true },
-        { value: '1', label: 'One', disabled: false, isPlaceholder: false },
-        { value: '2', label: 'Two', disabled: false, isPlaceholder: false },
-        { value: '3', label: 'Three - the only valid option', disabled: false, isPlaceholder: false }
-    ];
-
-    useEffect(() => {
-        const hostname = cockpit.file('/etc/hostname');
-        // hostname.watch(content => setHostname(content?.trim() ?? ""));
-        return hostname.close;
-    }, []);
+    const { existingLocations } = useContext(BorgmaticLocationsContext);
 
     return (
         <>
             <Flex>
-                <Flex grow={{ default: 'grow' }}>
-                    <FormSelect>
-                        {options.map((option, index) => (
-                            <FormSelectOption
-                            isDisabled={option.disabled}
-                            key={index}
-                            value={option.value}
-                            label={option.label}
-                            isPlaceholder={option.isPlaceholder}
-                            />
-                        ))}
-                    </FormSelect>
-                </Flex>
+                <Flex grow={{ default: 'grow' }} />
                 <Flex>
                     <Button variant="stateful" state="read" icon={<PlusIcon />} onClick={() => setAddRepoModalState(true)}>
                         {_("Add Repository")}
                     </Button>
-                    <AddRepo toggleModal={setAddRepoModalState} isOpen={modalAddRepoOpened} existingLocations={["22"]} />
+                    <AddRepo toggleModal={setAddRepoModalState} isOpen={modalAddRepoOpened} />
                 </Flex>
             </Flex>
             <Flex grow={{ default: 'grow' }}>
-                {/* <Card isFullHeight style={{ width: '100%' }}>
-                    <CardTitle>Backup Locations</CardTitle>
-                    <CardBody>
-                        <Table variant={TableVariant.compact} aria-label="Backup Locations Table">
-                            <Thead>
-                                <Tr>
-                                    <Th>{_("Name")}</Th>
-                                    <Th>{_("Status")}</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                <Tr>
-                                    <Td>{_("Location 1")}</Td>
-                                    <Td>{_("Active")}</Td>
-                                </Tr>
-                            </Tbody>
-                        </Table>
-                    </CardBody>
-                </Card> */}
                 <ListingTable
-                    aria-label={_("Virtual machines")}
+                    aria-label={_("Backup Locations")}
                     variant='compact'
                     columns={[
                         { title: _("Name"), header: true, props: { width: 25 } },
@@ -108,8 +59,8 @@ export const Application = () => {
                         { title: "", props: { width: 25, "aria-label": _("Actions") } },
                     ]}
                     emptyCaption={_("No Backup Locations defined.")}
-                    rows={[
-                        {
+                    rows={
+                        existingLocations.map((location) => ({
                             columns: [
                                 {
                                     title: (
@@ -117,9 +68,9 @@ export const Application = () => {
                                             variant="link"
                                             isInline
                                             component="a"
-                                            href={"#" + _("Location 1")}
+                                            href={"#" + _(location)}
                                         >
-                                            {_("Location 1")}
+                                            {_(location)}
                                         </Button>
                                     )
                                 },
@@ -127,8 +78,8 @@ export const Application = () => {
                                 { title: _("Running") },
                                 { title: <RepoActions /> }
                             ]
-                        }
-                    ]}
+                        }))
+                    }
                 />
             </Flex>
         </>
