@@ -45,7 +45,7 @@ export class Application extends React.Component<object, ApplicationState> {
         this.handleLocationChanged = this.handleLocationChanged.bind(this);
     }
 
-    handleLocationChanged() {``
+    handleLocationChanged() {
         this.setState({ path:  cockpit.location.path?.[0] || '' });
     }
 
