@@ -17,25 +17,36 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useState } from 'react';
-
-
+import React, { useContext, useEffect } from 'react';
 
 import cockpit from 'cockpit';
-import { BorgmaticLocationsContext } from '../context/borgmatic-config-files';
+import { BorgmaticLocationContext } from '../context/borgmatic-config-file';
 
 const _ = cockpit.gettext;
 
 
 export const Location = () => {
-    const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
-    const { existingLocations } = useContext(BorgmaticLocationsContext);
-    const path =  cockpit.location.path
-    console.log("Location component rendered with path:", path);
+    const path =  cockpit.location.path?.[0] || '';
+    const searchParams = new URLSearchParams(path);
+    const locationName = searchParams.get('location') ?? '';
+
+
+    const {config, readConfig } = useContext(BorgmaticLocationContext);
+
+    useEffect(() => {
+        console.log("Location component rendered with path:", locationName);
+        readConfig(locationName);
+    }, [locationName, readConfig]);
+
 
     return (
         <>
-            currentPath: {path}
+            
+                currentLocation: {locationName}
+            <pre>
+                { JSON.stringify(config ?? _("No content available for this location."), null, 2)}
+            </pre>
+
         </>
     );
 }

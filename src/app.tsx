@@ -23,8 +23,7 @@ import cockpit from 'cockpit';
 import { BorgmaticLocationsContext } from './context/borgmatic-config-files';
 import Locations from './components/locations';
 import Location from './components/location';
-
-const _ = cockpit.gettext;
+import { BorgmaticConfigFileProvider } from './context/borgmatic-config-file';
 
 interface ApplicationState {
     path: string;
@@ -62,7 +61,11 @@ export class Application extends React.Component<object, ApplicationState> {
         if (!path) {
             return (<Locations />);
         } else if (path.startsWith('location')) {
-            return (<Location />);
+            return (
+                <BorgmaticConfigFileProvider>
+                    <Location />
+                </BorgmaticConfigFileProvider>
+            );
         }
     }
 }
