@@ -21,7 +21,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import cockpit from 'cockpit';
-import { Repository } from './repository';
+import { LocationConfig } from './location-config';
 import { BorgmaticLocationContext } from '../context/borgmatic-config-file';
 
 const _ = cockpit.gettext;
@@ -29,22 +29,17 @@ const _ = cockpit.gettext;
 
 export const Location = () => {
 
-    const path =  cockpit.location.path?.[0] || '';
-    const searchParams = new URLSearchParams(path);
-    const locationName = searchParams.get('location') ?? '';
 
-
-    const {config, readConfig } = useContext(BorgmaticLocationContext);
+    const {locationName, readConfig } = useContext(BorgmaticLocationContext);
 
     useEffect(() => {
-        console.log("Location component rendered with path:", locationName);
-        readConfig(locationName);
+        readConfig();
     }, [locationName, readConfig]);
 
 
 
     const [activeTabKey, setActiveTabKey] = useState<string | number>(2);
-    const [isBox, setIsBox] = useState<boolean>(false);
+    
     // Toggle currently active tab
     const handleTabClick = (
         event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
@@ -61,9 +56,8 @@ export const Location = () => {
                 <Tab eventKey="1" title={_("Archive")}>
 
                 </Tab>
-                <Tab eventKey={2} title={<TabTitleText>{_("Repository")}</TabTitleText>}>
-                    <div>repository: {"locationName"}</div>
-                    <Repository />
+                <Tab eventKey={2} title={<TabTitleText>{_("Configuration")}</TabTitleText>}>
+                    <LocationConfig />
                 </Tab>
                 <Tab eventKey="3" title={_("Schedule")}>
 

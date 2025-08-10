@@ -4,12 +4,12 @@ import React, { Dispatch, SetStateAction, useContext, useState } from "react";
 import cockpit from 'cockpit';
 import { BorgmaticLocationsContext } from "../context/borgmatic-config-files";
 
-interface AddRepoProps {
+interface AddLocationProps {
     toggleModal: Dispatch<SetStateAction<boolean>>;
     isOpen: boolean;
 }
 
-function AddRepo({ toggleModal, isOpen }: AddRepoProps) {
+function AddLocation({ toggleModal, isOpen }: AddLocationProps) {
     const { existingLocations, reloadLocations } = useContext(BorgmaticLocationsContext);
     const [locationName, setName] = useState("");
     const [locationExists, setLocationExists] = useState(false);
@@ -81,4 +81,4 @@ function AddRepo({ toggleModal, isOpen }: AddRepoProps) {
         </Modal>
     );
 }
-export default AddRepo;
+export default AddLocation;

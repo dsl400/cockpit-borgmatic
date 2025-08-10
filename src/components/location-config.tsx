@@ -21,30 +21,26 @@ import React, { useContext, useEffect } from 'react';
 
 import cockpit from 'cockpit';
 import { BorgmaticLocationContext } from '../context/borgmatic-config-file';
+import RepoList from './repo-list';
+import SourceList from './source-list';
 const _ = cockpit.gettext;
 
 
-export const Repository = () => {
-    const path =  cockpit.location.path?.[0] || '';
-    const searchParams = new URLSearchParams(path);
-    const locationName = searchParams.get('location') ?? '';
+export const LocationConfig = () => {   
 
-
-    const {config, readConfig } = useContext(BorgmaticLocationContext);
+    const {locationName, readConfig } = useContext(BorgmaticLocationContext);
 
     useEffect(() => {
-        console.log("Location component rendered with path:", locationName);
-        readConfig(locationName);
+        readConfig();
     }, [locationName, readConfig]);
 
 
     return (
         <>
-            repository: {locationName}
-            
-
+            <RepoList />
+            <SourceList />
         </>
     );
 }
 
-export default Location;
+export default LocationConfig;

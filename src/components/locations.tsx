@@ -26,14 +26,14 @@ import { Button, Flex } from '@patternfly/react-core';
 import { PlusIcon } from '@patternfly/react-icons';
 import cockpit from 'cockpit';
 import { BorgmaticLocationsContext } from '../context/borgmatic-config-files';
-import AddRepo from './add-repo';
+import AddLocation from './add-location';
 import RepoActions from './repo-actions';
 
 const _ = cockpit.gettext;
 
 export const Locations = () => {
 
-    const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
+    const [modalAddLocationOpened, setAddRepoModalState] = useState(false);
 
     const { existingLocations } = useContext(BorgmaticLocationsContext);
 
@@ -43,9 +43,9 @@ export const Locations = () => {
                     <Flex grow={{ default: 'grow' }} />
                     <Flex>
                         <Button variant="stateful" state="read" icon={<PlusIcon />} onClick={() => setAddRepoModalState(true)}>
-                            {_("Add Repository")}
+                            {_("Add Location")}
                         </Button>
-                        <AddRepo toggleModal={setAddRepoModalState} isOpen={modalAddRepoOpened} />
+                        <AddLocation toggleModal={setAddRepoModalState} isOpen={modalAddLocationOpened} />
                     </Flex>
                 </Flex>
                 <Flex grow={{ default: 'grow' }}>
