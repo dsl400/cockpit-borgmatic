@@ -17,18 +17,14 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 
-import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import cockpit from 'cockpit';
-import { Repository } from './repository';
 import { BorgmaticLocationContext } from '../context/borgmatic-config-file';
-
 const _ = cockpit.gettext;
 
 
-export const Location = () => {
-
+export const Repository = () => {
     const path =  cockpit.location.path?.[0] || '';
     const searchParams = new URLSearchParams(path);
     const locationName = searchParams.get('location') ?? '';
@@ -42,33 +38,10 @@ export const Location = () => {
     }, [locationName, readConfig]);
 
 
-
-    const [activeTabKey, setActiveTabKey] = useState<string | number>(2);
-    const [isBox, setIsBox] = useState<boolean>(false);
-    // Toggle currently active tab
-    const handleTabClick = (
-        event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
-        tabIndex: string | number
-    ) => {
-        setActiveTabKey(tabIndex);
-    };
-
-
     return (
         <>
-            <h1>{locationName}</h1>
-            <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
-                <Tab eventKey="1" title={_("Archive")}>
-
-                </Tab>
-                <Tab eventKey={2} title={<TabTitleText>{_("Repository")}</TabTitleText>}>
-                    <div>repository: {"locationName"}</div>
-                    <Repository />
-                </Tab>
-                <Tab eventKey="3" title={_("Schedule")}>
-
-                </Tab>
-            </Tabs>
+            repository: {locationName}
+            
 
         </>
     );
