@@ -20,7 +20,7 @@
 import React, { useContext, useEffect } from 'react';
 
 import cockpit from 'cockpit';
-import { BorgmaticLocationContext } from '../context/borgmatic-config-file';
+import { useLocationConfigContext } from '../context/borgmatic-config-file';
 import RepoList from './repo-list';
 import SourceList from './source-list';
 const _ = cockpit.gettext;
@@ -28,7 +28,7 @@ const _ = cockpit.gettext;
 
 export const LocationConfig = () => {   
 
-    const {locationName, readConfig } = useContext(BorgmaticLocationContext);
+    const {locationName, readConfig } = useLocationConfigContext();
 
     useEffect(() => {
         readConfig();

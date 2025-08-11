@@ -17,26 +17,34 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
+import { Tab, Tabs, TabTitleText, Spinner } from '@patternfly/react-core';
 import cockpit from 'cockpit';
 import { LocationConfig } from './location-config';
-import { BorgmaticLocationContext } from '../context/borgmatic-config-file';
+import { useLocationConfigContext } from '../context/borgmatic-config-file';
 
 const _ = cockpit.gettext;
 
 
 export const Location = () => {
-
-
-    const {locationName, readConfig } = useContext(BorgmaticLocationContext);
+    const [isLoading, setIsLoading] = useState(true);
+    const {locationName, readConfig } = useLocationConfigContext();
 
     useEffect(() => {
-        readConfig();
+        setIsLoading(true);
+        const loadData = async () => {
+            try {
+                await readConfig();
+            } catch (error) {
+                console.error("Failed to load config:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        loadData();
     }, [locationName, readConfig]);
-
-
 
     const [activeTabKey, setActiveTabKey] = useState<string | number>(2);
     
@@ -48,6 +56,14 @@ export const Location = () => {
         setActiveTabKey(tabIndex);
     };
 
+    if (isLoading) {
+        return (
+            <div className="loading-container" style={{ textAlign: 'center', padding: '2rem' }}>
+                <Spinner size="xl" />
+                <p>{_("Loading configuration...")}</p>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -63,7 +79,6 @@ export const Location = () => {
 
                 </Tab>
             </Tabs>
-
         </>
     );
 }

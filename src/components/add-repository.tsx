@@ -1,9 +1,9 @@
 import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
-import React, { Dispatch, SetStateAction, useContext, useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import cockpit from 'cockpit';
-import { BorgmaticLocationContext } from "../context/borgmatic-config-file";
-import { BrogmaticRepository, buildBorgmaticConfig } from "../helpers/borgmatic-config";
+import { useLocationConfigContext } from "../context/borgmatic-config-file";
+import { BrogmaticRepository, buildBorgmaticConfig } from "../helpers/borgmatic-config.model";
 
 interface AddRepositoryProps {
     toggleModal: Dispatch<SetStateAction<boolean>>;
@@ -11,7 +11,7 @@ interface AddRepositoryProps {
 }
 
 function AddRepository({ toggleModal, isOpen }: AddRepositoryProps) {
-    const { locationName, config, readConfig } = useContext(BorgmaticLocationContext);
+    const { locationName, config, readConfig } = useLocationConfigContext();
 
     const [repositoryLabel, setName] = useState("");
     const [repoNameExists, setRepoLabelExists] = useState(false);
@@ -60,7 +60,7 @@ function AddRepository({ toggleModal, isOpen }: AddRepositoryProps) {
             repositories: repoList
         };
         const yamlContent = buildBorgmaticConfig(updatedConfig);
-        cockpit.file(`/etc/borgmatic.d/${locationName}.yml`).replace(yamlContent)
+        cockpit.file(`/etc/borgmatic.d/${locationName}.yml`, { superuser: 'require' }).replace(yamlContent)
                 .then(() => {
                     toggleModal(false);
                     readConfig();

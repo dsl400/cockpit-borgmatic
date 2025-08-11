@@ -1,0 +1,98 @@
+import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
+import { ExclamationCircleIcon } from "@patternfly/react-icons";
+import cockpit from 'cockpit';
+import React, { Dispatch, SetStateAction, useState } from "react";
+import { useLocationConfigContext } from "../context/borgmatic-config-file";
+import { buildBorgmaticConfig } from "../helpers/borgmatic-config.model";
+
+const _ = cockpit.gettext;
+
+interface AddSourceProps {
+    toggleModal: Dispatch<SetStateAction<boolean>>;
+    isOpen: boolean;
+}
+
+function AddSourceDir({ toggleModal, isOpen }: AddSourceProps) {
+    const { locationName, config, readConfig } = useLocationConfigContext();
+
+    const [sourceDirPath, setSourcePath] = useState("");
+    const [sourcePathExists, setSourceDirExists] = useState(false);
+    const handleSourceDirChange = (event: React.FormEvent<HTMLInputElement>, sourceDirPath: string) => {
+        const isValid = /^\/([a-zA-Z0-9._-]+\/?)*$/.test(sourceDirPath);
+        console.log("Source path:", sourceDirPath, "isValid:", isValid);
+        if (!isValid) {
+            sourceDirPath = "";
+        }
+        const sourceDirExists = config.sourceDirectories?.some(
+            (sourceDir:string) => sourceDir === sourceDirPath);
+
+        if (sourceDirPath && sourceDirExists) {
+            setSourceDirExists(true);
+        } else {
+            setSourceDirExists(false);
+        }
+        setSourcePath(sourceDirPath);
+    };
+
+    const handleConfirm = () => {
+        const sourceList = config.sourceDirectories;
+        sourceList.push(sourceDirPath);
+        const updatedConfig = {
+            ...config,
+            source_directories: sourceList
+        };
+        const yamlContent = buildBorgmaticConfig(updatedConfig);
+        cockpit.file(`/etc/borgmatic.d/${locationName}.yml`, { superuser: 'require' }).replace(yamlContent)
+                .then(() => {
+                    toggleModal(false);
+                    readConfig();
+                })
+                .catch((err) => {
+                    console.error("Failed to create repository:", err);
+                });
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            variant={ModalVariant.medium}
+            onClose={() => toggleModal(false)}
+        >
+            <ModalHeader title={_("Add source directory")} labelId="basic-modal-title" />
+            <ModalBody>
+                <TextInput
+                    placeholder={_("Enter Source Directory Path")}
+                    onChange={handleSourceDirChange}
+                />
+                <FormHelperText>
+                    <HelperText>
+                        {!sourceDirPath && (
+                            <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
+                                {_("Must be a valid Linux file path.")}
+                            </HelperTextItem>
+                        )}
+                        {sourcePathExists && (
+                            <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
+                                {_("Source directory already added.")}
+                            </HelperTextItem>
+                        )}
+                    </HelperText>
+                </FormHelperText>
+            </ModalBody>
+            <ModalFooter>
+                <Button
+                    key="confirm"
+                    variant="primary"
+                    onClick={handleConfirm}
+                    isDisabled={!sourceDirPath.length || sourcePathExists}
+                >
+                    Confirm
+                </Button>
+                <Button key="cancel" variant="link" onClick={() => toggleModal(false)}>
+                    Cancel
+                </Button>
+            </ModalFooter>
+        </Modal>
+    );
+}
+export default AddSourceDir;

@@ -24,12 +24,16 @@ import { Button, Card, CardBody, CardTitle } from '@patternfly/react-core';
 import { ListingTable } from 'cockpit-components-table';
 import { PlusIcon } from '@patternfly/react-icons';
 import AddRepository from './add-repository';
+import { useLocationConfigContext } from '../context/borgmatic-config-file';
+
 const _ = cockpit.gettext;
 
 
 export const RepoList = () => {
 
     const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
+
+    const { config } = useLocationConfigContext();
 
     return (
         <>
@@ -51,10 +55,17 @@ export const RepoList = () => {
                         variant='compact'
                         columns={[
                             { title: _("Name"), header: true, props: { width: 25 } },
+                            { title: _("Path"), header: true, props: { width: 25 } },
                             { title: "", props: { width: 25, "aria-label": _("Actions") } },
                         ]}
                         emptyCaption={_("No repositories defined.")}
-                        rows={[]}
+                        rows={(config?.repositories ?? []).map((repo) => ({
+                            columns: [
+                                { title: repo.label ?? repo.path },
+                                { title: repo.path },
+                                { title: "", props: {} },
+                            ],
+                        }))}
                     />
                 </CardBody>
             </Card>

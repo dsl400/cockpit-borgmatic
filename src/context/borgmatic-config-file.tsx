@@ -17,13 +17,13 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useContext } from 'react';
 import cockpit from 'cockpit';
-import { BorgmaticConfig, parseBorgmaticConfig } from '../helpers/borgmatic-config';
+import { BorgmaticConfigHelper } from '../helpers/borgmatic-config.helper';
 
 interface BorgmaticLocationContextType {
     locationName: string;
-    config: BorgmaticConfig | null;
+    config: BorgmaticConfigHelper | null;
     readConfig: () => Promise<void>;
 }
 
@@ -32,6 +32,15 @@ export const BorgmaticLocationContext = createContext<BorgmaticLocationContextTy
     config: null,
     readConfig: async () => {}
 });
+
+export function useLocationConfigContext() {
+    const { config, locationName, readConfig } = useContext(BorgmaticLocationContext);
+    console.log("Using BorgmaticLocationContext", { config, locationName });
+    if (!locationName) {
+        throw new Error("Borgmatic config is not available in the context");
+    }
+    return { config, locationName, readConfig };
+}
 
 interface BorgmaticConfigFileProviderProps {
     children: React.ReactNode;
@@ -43,15 +52,15 @@ export function BorgmaticConfigFileProvider({
     const path = cockpit.location.path?.[0] || '';
     const searchParams = new URLSearchParams(path);
     const locationName = searchParams.get('location') ?? '';
-    const [config, setConfig] = useState<BorgmaticConfig | null>(null);
+    const [config, setConfig] = useState<BorgmaticConfigHelper | null>(null);
 
     const readConfig = useCallback(async () => {
         try {
-            const content = await cockpit.file(`/etc/borgmatic.d/${locationName}.yml`).read();
-            const config: BorgmaticConfig = parseBorgmaticConfig(content || '');
+            const config = new BorgmaticConfigHelper(locationName);
+            await config.read();
             setConfig(config);
         } catch (err) {
-            console.error(`Failed to read file /etc/borgmatic.d/${locationName}.yml:`, err);
+            console.error(`Failed to read config for ${locationName}: `, err);
             setConfig(null);
         }
     }, [locationName]);
