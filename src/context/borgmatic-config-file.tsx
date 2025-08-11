@@ -35,10 +35,13 @@ export const BorgmaticLocationContext = createContext<BorgmaticLocationContextTy
 
 export function useLocationConfigContext() {
     const { config, locationName, readConfig } = useContext(BorgmaticLocationContext);
-    console.log("Using BorgmaticLocationContext", { config, locationName });
     if (!locationName) {
         throw new Error("Borgmatic config is not available in the context");
     }
+    if (!config) {
+        throw new Error(`Borgmatic config for location "${locationName}" is not available`);
+    }
+
     return { config, locationName, readConfig };
 }
 
@@ -52,7 +55,7 @@ export function BorgmaticConfigFileProvider({
     const path = cockpit.location.path?.[0] || '';
     const searchParams = new URLSearchParams(path);
     const locationName = searchParams.get('location') ?? '';
-    const [config, setConfig] = useState<BorgmaticConfigHelper | null>(null);
+    const [config, setConfig] = useState<BorgmaticConfigHelper | null>(new BorgmaticConfigHelper(locationName));
 
     const readConfig = useCallback(async () => {
         try {

@@ -26,8 +26,10 @@ export class BorgmaticConfigHelper {
      * Builds a Borgmatic YAML configuration string from a BorgmaticConfig object.
      * @param config The BorgmaticConfig object.
      */
-    write(config: BorgmaticConfig): string {
-        return yaml.dump(config, { noRefs: true, indent: 2 });
+    write(): Promise<string> {
+        const yamlContent = yaml.dump(this.config, { noRefs: true, indent: 2 });
+        console.log("Writing Borgmatic config to:", this.configPath, yamlContent);
+        return cockpit.file(this.configPath, { superuser: 'require' }).replace(yamlContent);
     }
 
     /**
@@ -45,7 +47,7 @@ export class BorgmaticConfigHelper {
      * Adds a repository to the Borgmatic configuration.
      * @param repo The repository object containing path and optional label.
      */
-    public addRepository(repo: BrogmaticRepository): void {
+    public addRepository(repo: BrogmaticRepository): BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -53,13 +55,14 @@ export class BorgmaticConfigHelper {
             this.config.repositories = [];
         }
         this.config.repositories.push(repo);
+        return this;
     }
 
     /**
      * Removes a repository from the Borgmatic configuration by path.
      * @param repoPath The path of the repository to remove.
      */
-    public removeRepository(repoPath: string): void {
+    public removeRepository(repoPath: string): BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -67,12 +70,14 @@ export class BorgmaticConfigHelper {
             throw new Error("No repositories defined in the configuration");
         }
         this.config.repositories = this.config.repositories.filter(repo => repo.path !== repoPath);
+        return this;
     }
 
     /**
      * Retrieves the source directories from the Borgmatic configuration.
      */
     public get sourceDirectories(): string[] {
+        console.log("Retrieving source directories from Borgmatic config", this.config);
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -83,7 +88,7 @@ export class BorgmaticConfigHelper {
      * Adds a source directory to the Borgmatic configuration.
      * @param sourcePath The path of the source directory to add.
      */
-    public addSourceDirectory(sourcePath: string): void {
+    public addSourceDirectory(sourcePath: string): BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -91,13 +96,14 @@ export class BorgmaticConfigHelper {
             this.config.source_directories = [];
         }
         this.config.source_directories.push(sourcePath);
+        return this;
     }
 
     /**
      * Removes a source directory from the Borgmatic configuration by path.
      * @param sourcePath The path of the source directory to remove.
      */
-    public removeSourceDirectory(sourcePath: string): void {
+    public removeSourceDirectory(sourcePath: string): BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -105,5 +111,6 @@ export class BorgmaticConfigHelper {
             throw new Error("No source directories defined in the configuration");
         }
         this.config.source_directories = this.config.source_directories.filter(path => path !== sourcePath);
+        return this;
     }
 }

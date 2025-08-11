@@ -3,7 +3,7 @@ import { ExclamationCircleIcon } from "@patternfly/react-icons";
 import cockpit from 'cockpit';
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { useLocationConfigContext } from "../context/borgmatic-config-file";
-import { buildBorgmaticConfig } from "../helpers/borgmatic-config.model";
+import { BorgmaticConfigHelper } from "../helpers/borgmatic-config.helper";
 
 const _ = cockpit.gettext;
 
@@ -13,8 +13,26 @@ interface AddSourceProps {
 }
 
 function AddSourceDir({ toggleModal, isOpen }: AddSourceProps) {
-    const { locationName, config, readConfig } = useLocationConfigContext();
+    const { config, readConfig } = useLocationConfigContext();
 
+    return (
+        <AddSourceDirForm
+        config={config}
+        readConfig={readConfig}
+        toggleModal={toggleModal}
+        isOpen={isOpen}
+        />
+    );
+}
+
+interface AddSourceDirFormProps {
+    config: BorgmaticConfigHelper;
+    readConfig: () => Promise<void>;
+    toggleModal: Dispatch<SetStateAction<boolean>>;
+    isOpen: boolean;
+}
+
+function AddSourceDirForm({ config, readConfig, toggleModal, isOpen }: AddSourceDirFormProps) {
     const [sourceDirPath, setSourcePath] = useState("");
     const [sourcePathExists, setSourceDirExists] = useState(false);
     const handleSourceDirChange = (event: React.FormEvent<HTMLInputElement>, sourceDirPath: string) => {
@@ -35,20 +53,13 @@ function AddSourceDir({ toggleModal, isOpen }: AddSourceProps) {
     };
 
     const handleConfirm = () => {
-        const sourceList = config.sourceDirectories;
-        sourceList.push(sourceDirPath);
-        const updatedConfig = {
-            ...config,
-            source_directories: sourceList
-        };
-        const yamlContent = buildBorgmaticConfig(updatedConfig);
-        cockpit.file(`/etc/borgmatic.d/${locationName}.yml`, { superuser: 'require' }).replace(yamlContent)
+        config.addSourceDirectory(sourceDirPath).write()
                 .then(() => {
                     toggleModal(false);
                     readConfig();
                 })
                 .catch((err) => {
-                    console.error("Failed to create repository:", err);
+                    console.error("Failed to add source directory:", err);
                 });
     };
 

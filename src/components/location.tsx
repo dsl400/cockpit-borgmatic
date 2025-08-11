@@ -30,7 +30,6 @@ const _ = cockpit.gettext;
 export const Location = () => {
     const [isLoading, setIsLoading] = useState(true);
     const {locationName, readConfig } = useLocationConfigContext();
-
     useEffect(() => {
         setIsLoading(true);
         const loadData = async () => {
@@ -68,14 +67,19 @@ export const Location = () => {
     return (
         <>
             <h1>{locationName}</h1>
-            <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
-                <Tab eventKey="1" title={_("Archive")}>
+            <Tabs 
+                activeKey={activeTabKey} 
+                onSelect={handleTabClick}
+                mountOnEnter={true}
+                unmountOnExit={true}
+            >
+                <Tab eventKey={1} title={_("Archive")}>
 
                 </Tab>
                 <Tab eventKey={2} title={<TabTitleText>{_("Configuration")}</TabTitleText>}>
                     <LocationConfig />
                 </Tab>
-                <Tab eventKey="3" title={_("Schedule")}>
+                <Tab eventKey={3} title={_("Schedule")}>
 
                 </Tab>
             </Tabs>

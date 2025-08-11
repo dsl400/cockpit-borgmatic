@@ -1,9 +1,9 @@
 import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
 import React, { Dispatch, SetStateAction, useState } from "react";
-import cockpit from 'cockpit';
 import { useLocationConfigContext } from "../context/borgmatic-config-file";
-import { BrogmaticRepository, buildBorgmaticConfig } from "../helpers/borgmatic-config.model";
+import { BorgmaticConfigHelper } from "../helpers/borgmatic-config.helper";
+import { BrogmaticRepository } from "../helpers/borgmatic-config.model";
 
 interface AddRepositoryProps {
     toggleModal: Dispatch<SetStateAction<boolean>>;
@@ -11,8 +11,26 @@ interface AddRepositoryProps {
 }
 
 function AddRepository({ toggleModal, isOpen }: AddRepositoryProps) {
-    const { locationName, config, readConfig } = useLocationConfigContext();
+    const { config, readConfig } = useLocationConfigContext();
 
+    return (
+        <AddRepositoryForm
+        config={config}
+        readConfig={readConfig}
+        toggleModal={toggleModal}
+        isOpen={isOpen}
+        />
+    );
+}
+
+interface AddRepositoryFormProps {
+    config: BorgmaticConfigHelper;
+    readConfig: () => Promise<void>;
+    toggleModal: Dispatch<SetStateAction<boolean>>;
+    isOpen: boolean;
+}
+
+function AddRepositoryForm({ config, readConfig, toggleModal, isOpen }: AddRepositoryFormProps) {
     const [repositoryLabel, setName] = useState("");
     const [repoNameExists, setRepoLabelExists] = useState(false);
     const handleLabelChange = (event: React.FormEvent<HTMLInputElement>, repoLabel: string) => {
@@ -20,7 +38,7 @@ function AddRepository({ toggleModal, isOpen }: AddRepositoryProps) {
         if (!isValid) {
             repoLabel = "";
         }
-        const repoLabelExists = config?.repositories?.some(
+        const repoLabelExists = config.repositories.some(
             (repo:BrogmaticRepository) => repo.label === repoLabel);
 
         if (repoLabel && repoLabelExists) {
@@ -50,23 +68,16 @@ function AddRepository({ toggleModal, isOpen }: AddRepositoryProps) {
     };
 
     const handleConfirm = () => {
-        const repoList = config?.repositories || [];
-        repoList.push({
+        config.addRepository({
             label: repositoryLabel,
             path: repositoryPath
-        } as BrogmaticRepository);
-        const updatedConfig = {
-            ...config,
-            repositories: repoList
-        };
-        const yamlContent = buildBorgmaticConfig(updatedConfig);
-        cockpit.file(`/etc/borgmatic.d/${locationName}.yml`, { superuser: 'require' }).replace(yamlContent)
+        }).write()
                 .then(() => {
                     toggleModal(false);
                     readConfig();
                 })
                 .catch((err) => {
-                    console.error("Failed to create repository:", err);
+                    console.error("Failed to add repository:", err);
                 });
     };
 

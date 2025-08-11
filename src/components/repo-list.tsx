@@ -47,7 +47,7 @@ export const RepoList = () => {
                     >
                         {_("Add")}
                     </Button>
-                    <AddRepository toggleModal={setAddRepoModalState} isOpen={modalAddRepoOpened} />
+                    {modalAddRepoOpened && <AddRepository toggleModal={setAddRepoModalState} isOpen={true} />}
                 </CardTitle>
                 <CardBody>
                     <ListingTable
