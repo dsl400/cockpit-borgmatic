@@ -36,8 +36,6 @@ export const SourceList = () => {
     const [ sourcePathToRemove, setSourcePathToRemove] = useState("");
     
     const handleDeleteSourceDirectory = () => {
-        console.log("handleDeleteSourceDirectory called with sourcePathToRemove:", sourcePathToRemove);        
-        // If confirmed, remove the source directory
         config.removeSourceDirectory(sourcePathToRemove).write()
             .then(() => {
                 setSourcePathToRemove("");
@@ -46,7 +44,6 @@ export const SourceList = () => {
             .catch((error) => {
                 console.error(`Failed to delete source directory ${sourcePathToRemove}:`, error);
             });
-        
     }
 
 

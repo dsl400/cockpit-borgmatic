@@ -17,14 +17,15 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
-
-import cockpit from 'cockpit';
-import { Button, Card, CardBody, CardTitle } from '@patternfly/react-core';
-import { ListingTable } from 'cockpit-components-table';
+import React, { useState } from 'react';
+import { Button, Card, CardBody, CardTitle, DropdownItem } from '@patternfly/react-core';
 import { PlusIcon } from '@patternfly/react-icons';
-import AddRepository from './add-repository';
+import { ListingTable } from 'cockpit-components-table';
 import { useLocationConfigContext } from '../context/borgmatic-config-file';
+import AddRepository from './add-repository';
+import cockpit from 'cockpit';
+import { KebabDropdown } from 'cockpit-components-dropdown';
+import { ConfirmDialog } from '../common/confirm';
 
 const _ = cockpit.gettext;
 
@@ -33,10 +34,43 @@ export const RepoList = () => {
 
     const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
 
-    const { config } = useLocationConfigContext();
+    const { config, readConfig } = useLocationConfigContext();
+    const [ repoToRemove, setRepoToRemove] = useState("");
+
+    const handleDeleteSourceDirectory = () => {
+    config.removeRepository(repoToRemove).write()
+            .then(() => {
+                setRepoToRemove("");
+                readConfig()
+            })
+            .catch((error) => {
+                console.error(`Failed to delete repository ${repoToRemove}:`, error);
+            });
+    }
+
+
+    const rowActions = (repoPath:string) => (
+            <KebabDropdown
+                dropdownItems={[
+                    <DropdownItem
+                        key="delete"
+                        onClick={() => setRepoToRemove(repoPath)}
+                    >
+                        {_("Delete")}
+                    </DropdownItem>
+                ]}
+            /> 
+        );
 
     return (
         <>
+            {repoToRemove && (<ConfirmDialog
+                    title={_("Delete Repository?")}
+                    message={repoToRemove}
+                    onConfirm={() => handleDeleteSourceDirectory()}
+                    onCancel={() => setRepoToRemove("")}
+                />
+                )}
             <Card>
                 <CardTitle style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span>Repositories</span>
@@ -54,8 +88,8 @@ export const RepoList = () => {
                         aria-label={_("Repositories")}
                         variant='compact'
                         columns={[
-                            { title: _("Name"), header: true, props: { width: 25 } },
-                            { title: _("Path"), header: true, props: { width: 25 } },
+                            { title: _("Name"), header: true, props: { width: 50 } },
+                            { title: _("Path"), header: true, props: { width: 50 } },
                             { title: "", props: { width: 25, "aria-label": _("Actions") } },
                         ]}
                         emptyCaption={_("No repositories defined.")}
@@ -63,7 +97,7 @@ export const RepoList = () => {
                             columns: [
                                 { title: repo.label ?? repo.path },
                                 { title: repo.path },
-                                { title: "", props: {} },
+                                { title: rowActions(repo.path) },
                             ],
                         }))}
                     />

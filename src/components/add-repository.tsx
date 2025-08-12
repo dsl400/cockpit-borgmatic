@@ -1,9 +1,30 @@
+/*
+ * This file is part of Cockpit.
+ *
+ * Copyright (C) 2017 Red Hat, Inc.
+ *
+ * Cockpit is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * Cockpit is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { useLocationConfigContext } from "../context/borgmatic-config-file";
 import { BorgmaticConfigHelper } from "../helpers/borgmatic-config.helper";
 import { BrogmaticRepository } from "../helpers/borgmatic-config.model";
+import cockpit from 'cockpit';
+const _ = cockpit.gettext;
 
 interface AddRepositoryProps {
     toggleModal: Dispatch<SetStateAction<boolean>>;
@@ -97,7 +118,7 @@ function AddRepositoryForm({ config, readConfig, toggleModal, isOpen }: AddRepos
                     <HelperText>
                         {!repositoryLabel && (
                             <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-                                Must be alphanumeric and can include hyphens.
+                                {_("Must be alphanumeric and can include hyphens.")}
                             </HelperTextItem>
                         )}
                         {repoNameExists && (
