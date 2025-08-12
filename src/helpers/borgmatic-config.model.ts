@@ -29,10 +29,11 @@ interface Check {
 }
 
 // Command hook configuration
-interface CommandHook {
+export interface CommandHook {
     before?: 'action' | 'repository' | 'configuration' | 'everything';
     after?: 'action' | 'repository' | 'configuration' | 'everything' | 'error';
     when?: string[];
+    where?: 'finish' | 'fail' | 'everywhere';
     run: string[];
     states?: ('finish' | 'fail')[];
 }

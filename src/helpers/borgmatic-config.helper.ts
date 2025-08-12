@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { BorgmaticConfig, BrogmaticRepository } from './borgmatic-config.model';
+import { BorgmaticConfig, BrogmaticRepository, CommandHook } from './borgmatic-config.model';
 import cockpit from 'cockpit';
 
 /**
@@ -59,21 +59,6 @@ export class BorgmaticConfigHelper {
     }
 
     /**
-     * Removes a repository from the Borgmatic configuration by path.
-     * @param repoPath The path of the repository to remove.
-     */
-    public removeCommand(repoPath: string): BorgmaticConfigHelper {
-        if (!this.config) {
-            throw new Error("Configuration not loaded");
-        }
-        if (!this.config.repositories) {
-            throw new Error("No repositories defined in the configuration");
-        }
-        this.config.repositories = this.config.repositories.filter(repo => repo.path !== repoPath);
-        return this;
-    }
-
-    /**
      * Retrieves the source directories from the Borgmatic configuration.
      */
     public get sourceDirectories(): string[] {
@@ -111,6 +96,37 @@ export class BorgmaticConfigHelper {
             throw new Error("No source directories defined in the configuration");
         }
         this.config.source_directories = this.config.source_directories.filter(path => path !== sourcePath);
+        return this;
+    }
+
+    /**
+     * Adds a command to the Borgmatic configuration.
+     * @param command
+     * @returns
+     */
+    public addCommand(command: CommandHook): BorgmaticConfigHelper {
+        if (!this.config) {
+            throw new Error("Configuration not loaded");
+        }
+        if (!this.config.commands) {
+            this.config.commands = [];
+        }
+        this.config.commands.push(command);
+        return this;
+    }
+
+    /**
+     * Removes a repository from the Borgmatic configuration by path.
+     * @param repoPath The path of the repository to remove.
+     */
+    public removeCommand(index: number): BorgmaticConfigHelper {
+        if (!this.config) {
+            throw new Error("Configuration not loaded");
+        }
+        if (!this.config.commands || index < 0 || index >= this.config.commands.length) {
+            throw new Error("Invalid command index or no commands defined in the configuration");
+        }
+        this.config.commands.splice(index, 1);
         return this;
     }
 }

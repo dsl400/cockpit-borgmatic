@@ -22,26 +22,27 @@ import { Button, Card, CardBody, CardTitle, DropdownItem } from '@patternfly/rea
 import { PlusIcon } from '@patternfly/react-icons';
 import { ListingTable } from 'cockpit-components-table';
 import { useLocationConfigContext } from '../context/borgmatic-config-file';
-import AddRepository from './add-repository';
 import cockpit from 'cockpit';
 import { KebabDropdown } from 'cockpit-components-dropdown';
 import { ConfirmDialog } from '../common/confirm';
+import { CommandHook } from '../helpers/borgmatic-config.model';
+import EditCommand from './edit-command';
 
 const _ = cockpit.gettext;
 
 
 export const CommandsList = () => {
 
-    const [modalAddCommandOpened, setAddCommandState] = useState(false);
+    const [modalAddCommandOpened, setEditCommandState] = useState(true);
 
     const { config, readConfig } = useLocationConfigContext();
-    const [ commandToRemove, setCommandToRemove ] = useState("");
+    const [ commandToRemove, setCommandToRemove ] = useState(-1);
     const [ commandToEdit, setCommandToEdit ] = useState("");
 
     const handleDeleteCommand = () => {
     config.removeCommand(commandToRemove).write()
             .then(() => {
-                setCommandToRemove("");
+                setCommandToRemove(-1);
                 readConfig()
             })
             .catch((error) => {
@@ -50,18 +51,18 @@ export const CommandsList = () => {
     }
 
 
-    const rowActions = (repoPath:string) => (
+    const rowActions = (commandIndex:number) => (
             <KebabDropdown
                 dropdownItems={[
                     <DropdownItem
                         key="edit"
-                        onClick={() => setCommandToRemove(repoPath)}
+                        onClick={() => setCommandToRemove(commandIndex)}
                     >
                         {_("Edit")}
                     </DropdownItem>,
                     <DropdownItem
                         key="delete"
-                        onClick={() => setCommandToRemove(repoPath)}
+                        onClick={() => setCommandToRemove(commandIndex)}
                     >
                         {_("Delete")}
                     </DropdownItem>
@@ -71,31 +72,25 @@ export const CommandsList = () => {
 
     return (
         <>
-            {commandToRemove && (<ConfirmDialog
+            {commandToRemove != -1 && (<ConfirmDialog
                     title={_("Delete Command?")}
                     message={commandToRemove}
                     onConfirm={() => handleDeleteCommand()}
-                    onCancel={() => setCommandToRemove("")}
+                    onCancel={() => setCommandToRemove(-1)}
                 />
                 )}
-            {commandToRemove && (<ConfirmDialog
-                    title={_("Delete Command?")}
-                    message={commandToRemove}
-                    onConfirm={() => handleDeleteCommand()}
-                    onCancel={() => setCommandToRemove("")}
-                />
-                )}
+            
             <Card>
                 <CardTitle style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span>{_("Commands")}</span>
                     <Button 
                         variant="link" 
                         icon={<PlusIcon />}
-                        onClick={() => setAddCommandState(true)}
+                        onClick={() => setEditCommandState(true)}
                     >
                         {_("Add")}
                     </Button>
-                    {modalAddCommandOpened && <AddRepository toggleModal={setAddCommandState} isOpen={true} />}
+                    {modalAddCommandOpened && <EditCommand toggleModal={setEditCommandState} isOpen={true} />}
                 </CardTitle>
                 <CardBody>
                     <ListingTable
@@ -107,11 +102,11 @@ export const CommandsList = () => {
                             { title: "", props: { width: 25, "aria-label": _("Actions") } },
                         ]}
                         emptyCaption={_("No commands defined.")}
-                        rows={(config?.repositories ?? []).map((repo) => ({
+                        rows={(config?.repositories ?? []).map((command,index) => ({
                             columns: [
-                                { title: repo.label ?? repo.path },
-                                { title: repo.path },
-                                { title: rowActions(repo.path) },
+                                { title: command.label ?? command.path },
+                                { title: command.path },
+                                { title: rowActions(index) },
                             ],
                         }))}
                     />

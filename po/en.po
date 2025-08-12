@@ -1,0 +1,67 @@
+# starter-kit German translations
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: starter-kit 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-03-09 16:09+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
+
+#: src/components/edit-command.tsx:135
+msgid "CommandHelp"
+msgstr ""
+"List of one or more command hooks to execute, triggered "
+"at particular points during borgmatic's execution." 
+"For each command hook, specify one of \"before\" or \"after\", not both."
+
+#: src/components/edit-command.tsx:149
+msgid "RunBeforeHelp"
+msgstr ""
+"Name for the point in borgmatic's execution that "
+"the commands should be run before (required if "
+"\"after\" isn't set):"
+" * \"action\" runs before each action for each "
+"repository."
+" * \"repository\" runs before all actions for each "
+"repository."
+" * \"configuration\" runs before all actions and "
+"repositories in the current configuration file. "
+" * \"everything\" runs before all configuration files. "
+
+
+#: src/components/edit-command.tsx:149
+msgid "RunAfterHelp"
+msgstr ""
+"Name for the point in borgmatic's execution that "
+"the commands should be run after (required if "
+"\"before\" isn't set): "
+" * \"action\" runs after each action for each "
+"repository. "
+" * \"repository\" runs after all actions for each "
+"repository. "
+" * \"configuration\" runs after all actions and "
+"repositories in the current configuration file. "
+" * \"everything\" runs after all configuration "
+"files. "
+" * \"error\" runs after an error occurs. "
+
+
+#: src/components/edit-command.tsx:149
+msgid "RunWhenHelp"
+msgstr ""
+"Only trigger the hook when borgmatic is run with "
+"particular actions listed here. Defaults to "
+"running for all actions. "
+
+#: src/components/edit-command.tsx:149
+msgid "RunWhereHelp"
+msgstr ""
+"Only trigger the hook if borgmatic encounters one "
+"of the states (execution results) listed here, "
