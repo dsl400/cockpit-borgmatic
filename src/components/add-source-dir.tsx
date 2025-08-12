@@ -97,10 +97,10 @@ function AddSourceDirForm({ config, readConfig, toggleModal, isOpen }: AddSource
                     onClick={handleConfirm}
                     isDisabled={!sourceDirPath.length || sourcePathExists}
                 >
-                    Confirm
+                    {_("Confirm")}
                 </Button>
                 <Button key="cancel" variant="link" onClick={() => toggleModal(false)}>
-                    Cancel
+                    {_("Cancel")}
                 </Button>
             </ModalFooter>
         </Modal>

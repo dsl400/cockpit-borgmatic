@@ -1,5 +1,31 @@
 @use "page.scss";
 
+html,
+body,
+div#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 p {
     font-weight: bold;
+}
+
+div#app{
+    display: flex;
+    flex-direction: column;
+
+    .pf-v6-c-tabs{
+        flex-shrink: 0;
+    }
+    .pf-v6-c-tab-content{
+        flex: 1;
+        overflow: auto;
+    }
+   
+
+}
+.pf-v6-c-form__helper-text{
+    min-height: 32px;
 }

@@ -108,10 +108,10 @@ function AddRepositoryForm({ config, readConfig, toggleModal, isOpen }: AddRepos
             variant={ModalVariant.medium}
             onClose={() => toggleModal(false)}
         >
-            <ModalHeader title={_("Create New Repository")} labelId="basic-modal-title" />
+            <ModalHeader title="Create New Repository" labelId="basic-modal-title" />
             <ModalBody>
                 <TextInput
-                    placeholder={_("Enter Repository Name")}
+                    placeholder="Enter Repository Name"
                     onChange={handleLabelChange}
                 />
                 <FormHelperText>
@@ -123,25 +123,25 @@ function AddRepositoryForm({ config, readConfig, toggleModal, isOpen }: AddRepos
                         )}
                         {repoNameExists && (
                             <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-                                {_("Location name already exists.")}
+                                Location name already exists.
                             </HelperTextItem>
                         )}
                     </HelperText>
                 </FormHelperText>
                 <TextInput
-                    placeholder={_("Enter Repository path")}
+                    placeholder="Enter Repository path"
                     onChange={handlePathChange}
                 />
                 <FormHelperText>
                     <HelperText>
                         {!repositoryPath && (
                             <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-                                {_("Must be alphanumeric and can include hyphens.")}
+                                Must be alphanumeric and can include hyphens.
                             </HelperTextItem>
                         )}
                         {repoPathExists && (
                             <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-                                {_("Repository path already exists.")}
+                                Repository path already exists.
                             </HelperTextItem>
                         )}
                     </HelperText>

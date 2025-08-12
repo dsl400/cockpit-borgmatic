@@ -17,25 +17,19 @@
  * along with Cockpit; If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect } from 'react';
-
-import cockpit from 'cockpit';
-import { useLocationConfigContext } from '../context/borgmatic-config-file';
+import React from 'react';
 import RepoList from './repo-list';
 import SourceList from './source-dir-list';
-const _ = cockpit.gettext;
+import CommandsList from './commands-list';
 
-
-export const LocationConfig = () => {   
-
-    const {locationName, readConfig } = useLocationConfigContext();
-
+export const LocationConfig = () => {
     return (
-        <>
+        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto' }}>
             <RepoList />
             <SourceList />
-        </>
+            <CommandsList />
+        </div>
     );
-}
+};
 
 export default LocationConfig;

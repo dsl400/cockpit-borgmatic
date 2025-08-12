@@ -62,7 +62,7 @@ export class BorgmaticConfigHelper {
      * Removes a repository from the Borgmatic configuration by path.
      * @param repoPath The path of the repository to remove.
      */
-    public removeRepository(repoPath: string): BorgmaticConfigHelper {
+    public removeCommand(repoPath: string): BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }

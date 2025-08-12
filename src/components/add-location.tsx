@@ -1,9 +1,10 @@
 import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
 import React, { Dispatch, SetStateAction, useContext, useState } from "react";
-import cockpit from 'cockpit';
 import { BorgmaticLocationsContext } from "../context/borgmatic-config-files";
+import cockpit from 'cockpit';
 
+const _ = cockpit.gettext;
 interface AddLocationProps {
     toggleModal: Dispatch<SetStateAction<boolean>>;
     isOpen: boolean;
@@ -54,7 +55,7 @@ function AddLocation({ toggleModal, isOpen }: AddLocationProps) {
                     <HelperText>
                         {!locationName && (
                             <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-                                Must be alphanumeric and can include hyphens.
+                                {_("Must be alphanumeric and can include hyphens.")}
                             </HelperTextItem>
                         )}
                         {locationExists && (
@@ -72,10 +73,10 @@ function AddLocation({ toggleModal, isOpen }: AddLocationProps) {
                     onClick={handleConfirm}
                     isDisabled={!locationName.length || locationExists}
                 >
-                    Confirm
+                    {_("Confirm")}
                 </Button>
                 <Button key="cancel" variant="link" onClick={() => toggleModal(false)}>
-                    Cancel
+                    {_("Cancel")}
                 </Button>
             </ModalFooter>
         </Modal>

@@ -30,22 +30,22 @@ import { ConfirmDialog } from '../common/confirm';
 const _ = cockpit.gettext;
 
 
-export const RepoList = () => {
+export const CommandsList = () => {
 
-    const [modalAddRepoOpened, setAddRepoModalState] = useState(false);
+    const [modalAddCommandOpened, setAddCommandState] = useState(false);
 
     const { config, readConfig } = useLocationConfigContext();
-    const [ repoToRemove, setRepoToRemove ] = useState("");
-    const [ repoToEdit, setRepoToEdit ] = useState("");
+    const [ commandToRemove, setCommandToRemove ] = useState("");
+    const [ commandToEdit, setCommandToEdit ] = useState("");
 
-    const handleDeleteSourceDirectory = () => {
-    config.removeCommand(repoToRemove).write()
+    const handleDeleteCommand = () => {
+    config.removeCommand(commandToRemove).write()
             .then(() => {
-                setRepoToRemove("");
+                setCommandToRemove("");
                 readConfig()
             })
             .catch((error) => {
-                console.error(`Failed to delete repository ${repoToRemove}:`, error);
+                console.error(`Failed to delete repository ${commandToRemove}:`, error);
             });
     }
 
@@ -55,13 +55,13 @@ export const RepoList = () => {
                 dropdownItems={[
                     <DropdownItem
                         key="edit"
-                        onClick={() => setRepoToRemove(repoPath)}
+                        onClick={() => setCommandToRemove(repoPath)}
                     >
                         {_("Edit")}
                     </DropdownItem>,
                     <DropdownItem
                         key="delete"
-                        onClick={() => setRepoToRemove(repoPath)}
+                        onClick={() => setCommandToRemove(repoPath)}
                     >
                         {_("Delete")}
                     </DropdownItem>
@@ -71,42 +71,42 @@ export const RepoList = () => {
 
     return (
         <>
-            {repoToRemove && (<ConfirmDialog
-                    title={_("Delete Repository?")}
-                    message={repoToRemove}
-                    onConfirm={() => handleDeleteSourceDirectory()}
-                    onCancel={() => setRepoToRemove("")}
+            {commandToRemove && (<ConfirmDialog
+                    title={_("Delete Command?")}
+                    message={commandToRemove}
+                    onConfirm={() => handleDeleteCommand()}
+                    onCancel={() => setCommandToRemove("")}
                 />
                 )}
-            {repoToRemove && (<ConfirmDialog
-                    title={_("Delete Repository?")}
-                    message={repoToRemove}
-                    onConfirm={() => handleDeleteSourceDirectory()}
-                    onCancel={() => setRepoToRemove("")}
+            {commandToRemove && (<ConfirmDialog
+                    title={_("Delete Command?")}
+                    message={commandToRemove}
+                    onConfirm={() => handleDeleteCommand()}
+                    onCancel={() => setCommandToRemove("")}
                 />
                 )}
             <Card>
                 <CardTitle style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span>{_("Repositories")}</span>
+                    <span>{_("Commands")}</span>
                     <Button 
                         variant="link" 
                         icon={<PlusIcon />}
-                        onClick={() => setAddRepoModalState(true)}
+                        onClick={() => setAddCommandState(true)}
                     >
                         {_("Add")}
                     </Button>
-                    {modalAddRepoOpened && <AddRepository toggleModal={setAddRepoModalState} isOpen={true} />}
+                    {modalAddCommandOpened && <AddRepository toggleModal={setAddCommandState} isOpen={true} />}
                 </CardTitle>
                 <CardBody>
                     <ListingTable
-                        aria-label={_("Repositories")}
+                        aria-label={_("Commands")}
                         variant='compact'
                         columns={[
                             { title: _("Name"), header: true, props: { width: 50 } },
                             { title: _("Path"), header: true, props: { width: 50 } },
                             { title: "", props: { width: 25, "aria-label": _("Actions") } },
                         ]}
-                        emptyCaption={_("No repositories defined.")}
+                        emptyCaption={_("No commands defined.")}
                         rows={(config?.repositories ?? []).map((repo) => ({
                             columns: [
                                 { title: repo.label ?? repo.path },
@@ -121,4 +121,4 @@ export const RepoList = () => {
     );
 }
 
-export default RepoList;
+export default CommandsList;
