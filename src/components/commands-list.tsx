@@ -33,11 +33,11 @@ const _ = cockpit.gettext;
 
 export const CommandsList = () => {
 
-    const [modalAddCommandOpened, setEditCommandState] = useState(true);
+    const [modalAddCommandOpened, setEditCommandState] = useState(false);
 
     const { config, readConfig } = useLocationConfigContext();
     const [ commandToRemove, setCommandToRemove ] = useState(-1);
-    const [ commandToEdit, setCommandToEdit ] = useState("");
+    const [ commandToEdit, setCommandToEdit ] = useState<number | undefined>(undefined);
 
     const handleDeleteCommand = () => {
     config.removeCommand(commandToRemove).write()
@@ -50,13 +50,17 @@ export const CommandsList = () => {
             });
     }
 
+    const closeModal = () =>{
+        setEditCommandState(false);
+        setCommandToEdit(undefined);
+    }
 
     const rowActions = (commandIndex:number) => (
             <KebabDropdown
                 dropdownItems={[
                     <DropdownItem
                         key="edit"
-                        onClick={() => setCommandToRemove(commandIndex)}
+                        onClick={() => setCommandToEdit(commandIndex)}
                     >
                         {_("Edit")}
                     </DropdownItem>,
@@ -70,11 +74,44 @@ export const CommandsList = () => {
             /> 
         );
 
+    const rowTitle = (c: CommandHook) => {
+        let result = "";
+        if (c.before) {
+            result = `${_("Before")} ${_(c.before)}`;
+        }else if (c.after) {
+            result = `${_("After")} ${_(c.after)}`;
+        }
+        
+        if (c.when) {
+            result += ` when action is ${_(c.when)}`;
+        }
+
+        if (c.states) {
+            result += ` if state is ${_(c.states)}`;
+        }
+
+        return result;
+    }
+
+    const onModalSave = (payload: CommandHook) => {
+
+        config.upsertCommand(payload,commandToEdit).write()
+            .then(() => {
+                closeModal();
+                readConfig();
+            })
+            .catch((err) => {
+                console.error("Failed to upsert command:", err);
+            });
+        
+    }
+
+
     return (
         <>
             {commandToRemove != -1 && (<ConfirmDialog
                     title={_("Delete Command?")}
-                    message={commandToRemove}
+                    message={rowTitle(config.commands[commandToRemove])}
                     onConfirm={() => handleDeleteCommand()}
                     onCancel={() => setCommandToRemove(-1)}
                 />
@@ -90,22 +127,25 @@ export const CommandsList = () => {
                     >
                         {_("Add")}
                     </Button>
-                    {modalAddCommandOpened && <EditCommand toggleModal={setEditCommandState} isOpen={true} />}
+                    {(modalAddCommandOpened || commandToEdit != undefined) && 
+                    <EditCommand 
+                        closeModal={closeModal} 
+                        command={config.commands[commandToEdit!]}
+                        onSave={onModalSave}
+                    />}
                 </CardTitle>
                 <CardBody>
                     <ListingTable
                         aria-label={_("Commands")}
                         variant='compact'
                         columns={[
-                            { title: _("Name"), header: true, props: { width: 50 } },
-                            { title: _("Path"), header: true, props: { width: 50 } },
+                            { title: _("Hook"), header: true, props: { width: 100 } },
                             { title: "", props: { width: 25, "aria-label": _("Actions") } },
                         ]}
                         emptyCaption={_("No commands defined.")}
-                        rows={(config?.repositories ?? []).map((command,index) => ({
+                        rows={(config?.commands ?? []).map((c,index) => ({
                             columns: [
-                                { title: command.label ?? command.path },
-                                { title: command.path },
+                                { title: rowTitle(c) },
                                 { title: rowActions(index) },
                             ],
                         }))}

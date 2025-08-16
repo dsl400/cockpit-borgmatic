@@ -110,7 +110,7 @@ export class BorgmaticConfigHelper {
      * @param command
      * @returns
      */
-    public addCommand(command: CommandHook): BorgmaticConfigHelper {
+    public upsertCommand(command: CommandHook, index?: number): BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -135,7 +135,11 @@ export class BorgmaticConfigHelper {
         }
         finalCommand.run = command.run;
 
-        this.config.commands.push(finalCommand);
+        if (index !== undefined && index >= 0 && index < this.config.commands.length) {
+            this.config.commands[index] = finalCommand;
+        } else {
+            this.config.commands.push(finalCommand);
+        }
         return this;
     }
 

@@ -18,41 +18,33 @@
  */
 
 import { Button, Form, FormGroup, FormHelperText, FormSelect, FormSelectOption, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextArea } from "@patternfly/react-core";
-import cockpit from 'cockpit';
-import React, { Dispatch, FormEvent, SetStateAction, useRef, useState } from "react";
-import { InfoPopover } from "../common/infoPopover";
-import { useLocationConfigContext } from "../context/borgmatic-config-file";
-import { BorgmaticConfigHelper } from "../helpers/borgmatic-config.helper";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
+import cockpit from 'cockpit';
+import React, { FormEvent, useEffect, useRef, useState } from "react";
+import { InfoPopover } from "../common/infoPopover";
 import { BorgmaticAfterAction, BorgmaticBeforeAction, BorgmaticStatesFilter, BorhgmaticWhenFilter, CommandHook } from "../helpers/borgmatic-config.model";
 const _ = cockpit.gettext;
 
 interface EditCommandProps {
-    toggleModal: Dispatch<SetStateAction<boolean>>;
-    isOpen: boolean;
-    editIndex?: number;
+    closeModal:() => void;
+    command?: CommandHook | undefined;
+    onSave?: (command: CommandHook) => void;
 }
 
-function EditCommand({ toggleModal, isOpen, editIndex }: EditCommandProps) {
-    const { config, readConfig } = useLocationConfigContext();
-
+function EditCommand({ closeModal, command, onSave }: EditCommandProps) {
     return (
         <EditCommandForm
-        config={config}
-        readConfig={readConfig}
-        toggleModal={toggleModal}
-        isOpen={isOpen}
-        editIndex={editIndex}
+        closeModal={closeModal}
+        command={command}
+        onSave={onSave}
         />
     );
 }
 
 interface EditCommandFormProps {
-    config: BorgmaticConfigHelper;
-    readConfig: () => Promise<void>;
-    toggleModal: Dispatch<SetStateAction<boolean>>;
-    isOpen: boolean;
-    editIndex?: number | undefined;
+    closeModal: () => void;
+    command?: CommandHook | undefined;
+    onSave?: ((command: CommandHook) => void) | undefined;
 }
 
 interface CommandHookViewModel {
@@ -63,9 +55,7 @@ interface CommandHookViewModel {
     hookAction: string;
 }
 
-function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }: EditCommandFormProps) {
-    console.log("EditCommandForm", config);
-
+function EditCommandForm({ closeModal, command, onSave }: EditCommandFormProps) {
     const commandRef = useRef<HTMLTextAreaElement>(null);
 
     const [formState, setFormState] = useState(() => {
@@ -74,19 +64,29 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
             states: BorgmaticStatesFilter.Finish,
             hookAction: 'after:action',
         };
-        if (editIndex !== undefined && config.commands.length > editIndex) {
-            const command = config.commands[editIndex];
-            commandRef.current!.value = command.run.join('\n');
+        if (command !== undefined) {
             if (command.before) {
                 defaultCommand.hookAction = `before:${command.before}`;
             } else if (command.after) {
                 defaultCommand.hookAction = `after:${command.after}`;
             }
+            if (command.when) {
+                defaultCommand.when = command.when;
+            }
+            if (command.states) {
+                defaultCommand.states = command.states;
+            }
         }
         return defaultCommand;
     });
 
-    const [isFormValid, setIsFormValid] = useState(editIndex !== undefined);
+    useEffect(() => {
+        if (command?.run && commandRef.current) {
+            commandRef.current.value = command.run.join('\n');
+        }
+    }, [command]);
+
+    const [isFormValid, setIsFormValid] = useState(command !== undefined);
 
     const handleInput = () => {
         setIsFormValid(!!commandRef.current?.value.trim());
@@ -119,6 +119,7 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
                 delete nextState.before;
                 nextState.after = hook as BorgmaticAfterAction;
             }
+            nextState.hookAction = value;
             return nextState;
         });
     };
@@ -142,30 +143,24 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
         if (formState.states) {
             payload.states = formState.states;
         }
-        config.addCommand(payload).write()
-                .then(() => {
-                    toggleModal(false);
-                    readConfig();
-                })
-                .catch((err) => {
-                    console.error("Failed to add run command:", err);
-                });
+        onSave?.(payload);
     };
 
     return (
         <Modal
-            isOpen={isOpen}
+            isOpen
             variant={ModalVariant.medium}
-            onClose={() => toggleModal(false)}
+            onClose={closeModal}
         >
-            <ModalHeader title={_(editIndex ? "Edit Command" : "Create Command")} labelId="basic-modal-title" />
+            <ModalHeader title={_(command ? "Edit Command" : "Create Command")} labelId="basic-modal-title" />
             <ModalBody>
+                {formState.hookAction} {JSON.stringify(command)}
                 <Form id="edit-command-form" onSubmit={formSubmit}>
                     <FormGroup
                         label={_("Hook:")}
                         labelInfo={<InfoPopover bodyContent={_("RunHookHelp")} />}
                         type="string"
-                        fieldId="hook"
+                        fieldId="hookAction"
                     >
                         <FormSelect
                             id="hookAction"
@@ -268,7 +263,7 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
                 >
                     {_("Confirm")}
                 </Button>
-                <Button key="cancel" variant="link" onClick={() => toggleModal(false)}>
+                <Button key="cancel" variant="link" onClick={() => closeModal()}>
                     {_("Cancel")}
                 </Button>
             </ModalFooter>
