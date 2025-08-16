@@ -1,9 +1,10 @@
-import { Button, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
+import { Button, FormGroup, FormHelperText, HelperText, HelperTextItem, Modal, ModalBody, ModalFooter, ModalHeader, ModalVariant, TextInput } from "@patternfly/react-core";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
 import cockpit from 'cockpit';
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { useLocationConfigContext } from "../context/borgmatic-config-file";
 import { BorgmaticConfigHelper } from "../helpers/borgmatic-config.helper";
+import { FileAutoComplete } from "cockpit-components-file-autocomplete.jsx";
 
 const _ = cockpit.gettext;
 
@@ -35,9 +36,9 @@ interface AddSourceDirFormProps {
 function AddSourceDirForm({ config, readConfig, toggleModal, isOpen }: AddSourceDirFormProps) {
     const [sourceDirPath, setSourcePath] = useState("");
     const [sourcePathExists, setSourceDirExists] = useState(false);
-    const handleSourceDirChange = (event: React.FormEvent<HTMLInputElement>, sourceDirPath: string) => {
+    const handleSourceDirChange = (sourceDirPath: string) => {
+        console.log("Source directory changed:", sourceDirPath);
         const isValid = /^\/([a-zA-Z0-9._-]+\/?)*$/.test(sourceDirPath);
-        console.log("Source path:", sourceDirPath, "isValid:", isValid);
         if (!isValid) {
             sourceDirPath = "";
         }
@@ -71,8 +72,13 @@ function AddSourceDirForm({ config, readConfig, toggleModal, isOpen }: AddSource
         >
             <ModalHeader title={_("Add source directory")} labelId="basic-modal-title" />
             <ModalBody>
-                <TextInput
+                {/* <TextInput
                     placeholder={_("Enter Source Directory Path")}
+                    onChange={handleSourceDirChange}
+                /> */}
+                <FileAutoComplete
+                    placeholder={_("Select Source Directory")}
+                    superuser="try"
                     onChange={handleSourceDirChange}
                 />
                 <FormHelperText>
@@ -89,6 +95,7 @@ function AddSourceDirForm({ config, readConfig, toggleModal, isOpen }: AddSource
                         )}
                     </HelperText>
                 </FormHelperText>
+
             </ModalBody>
             <ModalFooter>
                 <Button
