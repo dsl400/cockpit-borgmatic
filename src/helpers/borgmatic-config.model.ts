@@ -28,14 +28,47 @@ interface Check {
     xxh64sum_command?: string;
 }
 
+export enum BorgmaticBeforeAction {
+    Action = 'action',
+    Repository = 'repository',
+    Configuration = 'configuration',
+    Everything = 'everything'
+}
+
+export enum BorgmaticAfterAction {
+    Action = 'action',
+    Repository = 'repository',
+    Configuration = 'configuration',
+    Everything = 'everything',
+    Error = 'error'
+}
+
+export enum BorhgmaticWhenFilter {
+    Create = 'create',
+    Check = 'check',
+    CompactValue = 'compactvalue',
+    Prune = 'prune'
+}
+
+export enum BorgmaticWhereFilter {
+    Finish = 'finish',
+    Fail = 'fail',
+    Everywhere = 'everywhere'
+}
+
+export enum BorgmaticStateFilter {
+    Finish = 'finish',
+    Fail = 'fail',
+}
+
 // Command hook configuration
 export interface CommandHook {
-    before?: 'action' | 'repository' | 'configuration' | 'everything';
-    after?: 'action' | 'repository' | 'configuration' | 'everything' | 'error';
-    when?: string[];
-    where?: 'finish' | 'fail' | 'everywhere';
     run: string[];
-    states?: ('finish' | 'fail')[];
+    before?: BorgmaticBeforeAction
+    after?: BorgmaticAfterAction
+    when?: BorhgmaticWhenFilter
+    where?: BorgmaticWhereFilter
+    states?: BorgmaticStateFilter;
 }
 
 // Database configurations

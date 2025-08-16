@@ -62,7 +62,6 @@ export class BorgmaticConfigHelper {
      * Retrieves the source directories from the Borgmatic configuration.
      */
     public get sourceDirectories(): string[] {
-        console.log("Retrieving source directories from Borgmatic config", this.config);
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
@@ -97,6 +96,13 @@ export class BorgmaticConfigHelper {
         }
         this.config.source_directories = this.config.source_directories.filter(path => path !== sourcePath);
         return this;
+    }
+
+    public get commands(): CommandHook[] {
+        if (!this.config) {
+            throw new Error("Configuration not loaded");
+        }
+        return this.config.commands || [];
     }
 
     /**
