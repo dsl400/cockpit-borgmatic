@@ -114,10 +114,28 @@ export class BorgmaticConfigHelper {
         if (!this.config) {
             throw new Error("Configuration not loaded");
         }
+        if (!command.before && !command.after) {
+            throw new Error("Command must have either 'before' or 'after' defined");
+        }
         if (!this.config.commands) {
             this.config.commands = [];
         }
-        this.config.commands.push(command);
+
+        const finalCommand = {} as CommandHook;
+        if (command.before) {
+            finalCommand.before = command.before;
+        } else if (command.after) {
+            finalCommand.after = command.after;
+        }
+        if (command.when) {
+            finalCommand.when = command.when;
+        }
+        if (command.states) {
+            finalCommand.states = command.states;
+        }
+        finalCommand.run = command.run;
+
+        this.config.commands.push(finalCommand);
         return this;
     }
 

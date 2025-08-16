@@ -24,7 +24,7 @@ import { InfoPopover } from "../common/infoPopover";
 import { useLocationConfigContext } from "../context/borgmatic-config-file";
 import { BorgmaticConfigHelper } from "../helpers/borgmatic-config.helper";
 import { ExclamationCircleIcon } from "@patternfly/react-icons";
-import { BorgmaticAfterAction, BorgmaticBeforeAction, BorgmaticWhereFilter, BorhgmaticWhenFilter, CommandHook } from "../helpers/borgmatic-config.model";
+import { BorgmaticAfterAction, BorgmaticBeforeAction, BorgmaticStatesFilter, BorhgmaticWhenFilter, CommandHook } from "../helpers/borgmatic-config.model";
 const _ = cockpit.gettext;
 
 interface EditCommandProps {
@@ -59,7 +59,7 @@ interface CommandHookViewModel {
     before?: BorgmaticBeforeAction;
     after?: BorgmaticAfterAction;
     when?: BorhgmaticWhenFilter;
-    where?: BorgmaticWhereFilter;
+    states?: BorgmaticStatesFilter;
     hookAction: string;
 }
 
@@ -71,6 +71,7 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
     const [formState, setFormState] = useState(() => {
         const defaultCommand: CommandHookViewModel = {
             after: BorgmaticAfterAction.Action,
+            states: BorgmaticStatesFilter.Finish,
             hookAction: 'after:action',
         };
         if (editIndex !== undefined && config.commands.length > editIndex) {
@@ -97,9 +98,9 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
             return nextState;
         });
     };
-    const updateWhereValue = (event: FormEvent<HTMLSelectElement>, value: string) => {
+    const updateStatesValue = (event: FormEvent<HTMLSelectElement>, value: string) => {
         setFormState((prevState) => {
-            const nextState = { ...prevState, where: value as BorgmaticWhereFilter };
+            const nextState = { ...prevState, states: value as BorgmaticStatesFilter };
             return nextState;
         });
     };
@@ -138,8 +139,8 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
         if (formState.when) {
             payload.when = formState.when;
         }
-        if (formState.where) {
-            payload.where = formState.where;
+        if (formState.states) {
+            payload.states = formState.states;
         }
         config.addCommand(payload).write()
                 .then(() => {
@@ -160,30 +161,6 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
             <ModalHeader title={_(editIndex ? "Edit Command" : "Create Command")} labelId="basic-modal-title" />
             <ModalBody>
                 <Form id="edit-command-form" onSubmit={formSubmit}>
-                    <FormGroup
-                        label={_("Command:")}
-                        labelInfo={<InfoPopover bodyContent={_("CommandHelp")} />}
-                        type="string"
-                        fieldId="run"
-                    >
-                        <TextArea
-                            id="run"
-                            name="run"
-                            rows={5}
-                            ref={commandRef}
-                            onInput={handleInput}
-                            placeholder={_("Enter Commands")}
-                        />
-                        <FormHelperText>
-                            <HelperText>
-                                {!isFormValid && (
-                                    <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
-                                        {_("Command is required.")}
-                                    </HelperTextItem>
-                                )}
-                            </HelperText>
-                        </FormHelperText>
-                    </FormGroup>
                     <FormGroup
                         label={_("Hook:")}
                         labelInfo={<InfoPopover bodyContent={_("RunHookHelp")} />}
@@ -213,6 +190,30 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
                         </FormSelect>
                     </FormGroup>
                     <FormGroup
+                        label={_("Command:")}
+                        labelInfo={<InfoPopover bodyContent={_("CommandHelp")} />}
+                        type="string"
+                        fieldId="run"
+                    >
+                        <TextArea
+                            id="run"
+                            name="run"
+                            rows={5}
+                            ref={commandRef}
+                            onInput={handleInput}
+                            placeholder={_("Enter Commands")}
+                        />
+                        <FormHelperText>
+                            <HelperText>
+                                {!isFormValid && (
+                                    <HelperTextItem icon={<ExclamationCircleIcon />} variant="error">
+                                        {_("Command is required.")}
+                                    </HelperTextItem>
+                                )}
+                            </HelperText>
+                        </FormHelperText>
+                    </FormGroup>
+                    <FormGroup
                         label={_("Run When:")}
                         labelInfo={<InfoPopover bodyContent={_("RunWhenHelp")} />}
                         type="string" fieldId="when"
@@ -228,7 +229,7 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
                                 { label:"for all actions", value:"" },
                                 { label:"create", value:"create" },
                                 { label:"prune", value:"prune" },
-                                { label:"compactvalue:", value:"compactvalue" },
+                                { label:"compactvalue", value:"compactvalue" },
                                 { label:"check", value:"check" },
                             ].map((option, index) => (
                                 <FormSelectOption key={index} value={option.value} label={_(option.label)} />
@@ -236,21 +237,20 @@ function EditCommandForm({ config, readConfig, toggleModal, isOpen, editIndex }:
                         </FormSelect>
                     </FormGroup>
                     <FormGroup
-                        label={_("Run Where:")}
+                        label={_("Run where State is:")}
                         labelInfo={<InfoPopover bodyContent={_("RunWhereHelp")} />}
-                        type="string" fieldId="where"
+                        type="string" fieldId="states"
                     >
                         <FormSelect
-                            id="where"
-                            name="where"
-                            onChange={updateWhereValue}
-                            value={formState.where}
-                            aria-label={_("Select Where hook")}
+                            id="states"
+                            name="states"
+                            onChange={updateStatesValue}
+                            value={formState.states}
+                            aria-label={_("Select States filter")}
                         >
                             {[
-                                { label:"everywhere", value: "" },
-                                { label:"fail", value: "fail" },
-                                { label: "finish", value: "finish" }
+                                { label:"fail", value: BorgmaticStatesFilter.Fail },
+                                { label: "finish", value: BorgmaticStatesFilter.Finish }
                             ].map((option, index) => (
                                 <FormSelectOption key={index} value={option.value} label={_(option.label)} />
                             ))}

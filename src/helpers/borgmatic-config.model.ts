@@ -50,15 +50,9 @@ export enum BorhgmaticWhenFilter {
     Prune = 'prune'
 }
 
-export enum BorgmaticWhereFilter {
+export enum BorgmaticStatesFilter {
     Finish = 'finish',
-    Fail = 'fail',
-    Everywhere = 'everywhere'
-}
-
-export enum BorgmaticStateFilter {
-    Finish = 'finish',
-    Fail = 'fail',
+    Fail = 'fail'
 }
 
 // Command hook configuration
@@ -67,8 +61,7 @@ export interface CommandHook {
     before?: BorgmaticBeforeAction
     after?: BorgmaticAfterAction
     when?: BorhgmaticWhenFilter
-    where?: BorgmaticWhereFilter
-    states?: BorgmaticStateFilter;
+    states?: BorgmaticStatesFilter
 }
 
 // Database configurations
